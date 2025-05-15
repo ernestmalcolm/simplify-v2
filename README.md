@@ -1,22 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Simplify v2
+
+A modern web application built with Next.js 14, Tailwind CSS, and Mantine UI.
+
+## Features
+
+- Next.js 14 with App Router
+- Tailwind CSS with custom color palette
+- Mantine UI components
+- Dark mode support
+- Supabase integration
+- Poppins font
 
 ## Getting Started
 
-First, run the development server:
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Copy `.env.example` to `.env.local` and fill in your Supabase credentials:
+   ```bash
+   cp .env.example .env.local
+   ```
+4. Start the development server:
+   ```bash
+   npm run dev
+   ```
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Project Structure
+
+```
+src/
+├── app/              # Next.js app directory
+│   ├── layout.js     # Root layout
+│   ├── page.js       # Home page
+│   └── globals.css   # Global styles
+├── components/       # React components
+│   └── ThemeToggle.js
+└── lib/             # Utility functions and configurations
+    └── supabaseClient.js
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Environment Variables
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+Create a `.env.local` file with the following variables:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your-project-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+## Development
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm start` - Start production server
+- `npm run lint` - Run ESLint
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
