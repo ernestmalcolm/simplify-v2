@@ -14,7 +14,7 @@ export default function RegisterPage() {
             Coming soon! This feature is currently under development.
           </p>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }
