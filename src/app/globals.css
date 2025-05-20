@@ -39,15 +39,15 @@ body {
   }
 
   .btn-primary {
-    @apply bg-primary text-white hover:bg-primary-700;
+    @apply bg-primary text-white hover:bg-primary/80;
   }
 
   .btn-secondary {
-    @apply bg-secondary text-white hover:bg-secondary-700;
+    @apply bg-secondary text-white hover:bg-secondary/80;
   }
 
   .btn-accent {
-    @apply bg-accent text-white hover:bg-accent-700;
+    @apply bg-accent text-white hover:bg-accent/80;
   }
 
   .card {

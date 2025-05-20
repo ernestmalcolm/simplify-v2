@@ -1,7 +1,9 @@
+import "@mantine/notifications/styles.css";
 import { Poppins } from "next/font/google";
 import { MantineProvider, createTheme } from "@mantine/core";
 import "@mantine/core/styles.css";
 import "./globals.css";
+import { Notifications } from "@mantine/notifications";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -106,7 +108,12 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body className={`${poppins.variable} font-sans antialiased`}>
-        <MantineProvider theme={theme} defaultColorScheme="light">
+        <MantineProvider
+          theme={theme}
+          defaultColorScheme="light"
+          notifications={{ position: "bottom-right" }}
+        >
+          <Notifications position="bottom-right" withinPortal />
           {children}
         </MantineProvider>
       </body>

@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button, Modal } from "@mantine/core";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
 
 const sectionVariants = {
   hidden: { opacity: 0, y: 40 },
@@ -21,6 +23,27 @@ const cardVariants = {
 
 export default function HomePage() {
   const [opened, setOpened] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    async function checkAuth() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        // Optionally check for company and redirect to onboarding
+        const { data: company } = await supabase
+          .from("companies")
+          .select("id")
+          .eq("user_id", user.id)
+          .single();
+        if (!company) {
+          router.replace("/onboarding");
+        }
+      }
+    }
+    checkAuth();
+  }, [router]);
 
   return (
     <>
