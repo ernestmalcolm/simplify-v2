@@ -44,7 +44,13 @@ export default function LoginPage() {
 
   async function handleGoogle() {
     setLoading(true);
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+
+    // Force local URL during development
+    const isDevelopment = process.env.NODE_ENV === "development";
+    const appUrl = isDevelopment
+      ? "http://localhost:3000"
+      : process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {

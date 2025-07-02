@@ -38,6 +38,7 @@ import {
   IconId,
   IconCreditCard,
   IconLock,
+  IconSettings,
 } from "@tabler/icons-react";
 import Image from "next/image";
 import React from "react";
@@ -89,28 +90,14 @@ const taxLinks = [
   },
 ];
 
-const companyLinks = [
-  {
-    href: "/company-profile/company-info",
-    label: "Company Info",
-    icon: IconId,
-  },
-  {
-    href: "/company-profile/company-metrics",
-    label: "Company Metrics",
-    icon: IconChartBar,
-  },
-];
-
 export default function MainLayout({ children }) {
   const pathname = usePathname();
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [company, setCompany] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [taxOpen, setTaxOpen] = useState(false);
+  const [taxOpen, setTaxOpen] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const [companyOpen, setCompanyOpen] = useState(false);
 
   useEffect(() => {
     async function getUserAndCompany() {
@@ -235,133 +222,81 @@ export default function MainLayout({ children }) {
               </Tooltip>
             );
           })}
-          {/* Company Profile Collapsible */}
-          <Tooltip
-            label="Company Profile"
-            disabled={sidebarOpen}
-            withArrow
-            openDelay={300}
-          >
-            <div>
-              <button
-                type="button"
-                onClick={() => setCompanyOpen((o) => !o)}
-                className={`flex items-center w-full px-2 py-2.5 rounded-lg font-medium transition-colors duration-200 text-left
-                  ${
-                    companyOpen
-                      ? "bg-primary/10 text-primary"
-                      : "text-secondary"
-                  }
-                  hover:bg-primary/10 hover:text-primary
-                  ${!sidebarOpen ? "justify-center px-0" : "justify-between"}`}
-                style={{ background: "none" }}
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <IconBuilding className="w-5 h-5 text-primary" />
-                  {sidebarOpen && (
-                    <span className="truncate">Company Profile</span>
-                  )}
-                </div>
-                {sidebarOpen && (
-                  <span className="flex-1 flex justify-end">
-                    {companyOpen ? (
-                      <IconChevronUp className="w-4 h-4" />
-                    ) : (
-                      <IconChevronDown className="w-4 h-4" />
-                    )}
-                  </span>
-                )}
-              </button>
-              <Collapse
-                in={companyOpen && sidebarOpen}
-                transitionDuration={150}
-              >
-                <div className="flex flex-col gap-1 pl-4 mt-1">
-                  {companyLinks.map((link) => {
-                    const isActive = pathname === link.href;
-                    const Icon = link.icon;
-                    return (
-                      <Link
-                        key={link.href}
-                        href={link.href}
-                        className={`flex items-center gap-2 px-2 py-2.5 rounded-md font-medium transition-all duration-200
-                          ${
-                            isActive
-                              ? "bg-primary/10 text-primary shadow-sm"
-                              : "text-secondary"
-                          }
-                          hover:bg-primary/10 hover:text-primary`}
-                      >
-                        <span className="flex items-center justify-center">
-                          <Icon className="w-5 h-5 text-primary" />
-                        </span>
-                        <span className="truncate">{link.label}</span>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </Collapse>
-            </div>
-          </Tooltip>
           {/* Tax Corner Collapsible */}
+          <div className="relative">
+            <button
+              onClick={() => setTaxOpen(!taxOpen)}
+              className={`group flex items-center gap-3 px-2 py-2.5 rounded-lg font-medium transition-all duration-200 w-full text-left
+                ${
+                  pathname.startsWith("/tax-corner")
+                    ? "bg-primary/10 text-primary shadow-sm"
+                    : "text-secondary"
+                }
+                hover:bg-primary/10 hover:text-primary
+                ${!sidebarOpen ? "justify-center px-0" : ""}`}
+            >
+              <span className="flex items-center justify-center">
+                <IconFolder className="w-5 h-5 text-primary" />
+              </span>
+              {sidebarOpen && (
+                <span className="truncate flex-1">Tax Corner</span>
+              )}
+              {sidebarOpen &&
+                (taxOpen ? (
+                  <IconChevronUp className="w-4 h-4" />
+                ) : (
+                  <IconChevronDown className="w-4 h-4" />
+                ))}
+            </button>
+            <Collapse in={taxOpen && sidebarOpen}>
+              <div className="pt-2 pl-4 flex flex-col gap-1 border-l-2 border-primary/20 ml-4">
+                {taxLinks.map((link) => {
+                  const isActive = pathname === link.href;
+                  const Icon = link.icon;
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className={`group flex items-center gap-2 px-2 py-2 rounded-md font-medium text-sm transition-all duration-200
+                        ${
+                          isActive
+                            ? "bg-primary/10 text-primary"
+                            : "text-secondary"
+                        } hover:bg-primary/10 hover:text-primary`}
+                    >
+                      <Icon className="w-4 h-4 text-primary" />
+                      <span>{link.label}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </Collapse>
+          </div>
+          {/* Company Info Direct Link */}
           <Tooltip
-            label="Tax Corner"
+            label="Company Info"
             position="right"
             disabled={sidebarOpen}
+            key="/company-profile/company-info"
             withArrow
             openDelay={300}
           >
-            <div>
-              <button
-                type="button"
-                onClick={() => setTaxOpen((o) => !o)}
-                className={`flex items-center w-full px-2 py-2.5 rounded-lg font-medium transition-colors duration-200 text-left
-                  ${taxOpen ? "bg-primary/10 text-primary" : "text-secondary"}
-                  hover:bg-primary/10 hover:text-primary
-                  ${!sidebarOpen ? "justify-center px-0" : "justify-between"}`}
-                style={{ background: "none" }}
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <IconFolder className="w-5 h-5 text-primary" />
-                  {sidebarOpen && <span className="truncate">Tax Corner</span>}
-                </div>
-                {sidebarOpen && (
-                  <span className="flex-1 flex justify-end">
-                    {taxOpen ? (
-                      <IconChevronUp className="w-4 h-4" />
-                    ) : (
-                      <IconChevronDown className="w-4 h-4" />
-                    )}
-                  </span>
-                )}
-              </button>
-              <Collapse in={taxOpen && sidebarOpen} transitionDuration={150}>
-                <div className="flex flex-col gap-1 pl-4 mt-1">
-                  {taxLinks.map((link) => {
-                    const isActive = pathname === link.href;
-                    const Icon = link.icon;
-                    return (
-                      <Link
-                        key={link.href}
-                        href={link.href}
-                        className={`flex items-center gap-2 px-2 py-2.5 rounded-md font-medium transition-all duration-200
-                          ${
-                            isActive
-                              ? "bg-primary/10 text-primary shadow-sm"
-                              : "text-secondary"
-                          }
-                          hover:bg-primary/10 hover:text-primary`}
-                      >
-                        <span className="flex items-center justify-center">
-                          <Icon className="w-5 h-5 text-primary" />
-                        </span>
-                        <span className="truncate">{link.label}</span>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </Collapse>
-            </div>
+            <Link
+              href="/company-profile/company-info"
+              className={`group flex items-center gap-3 px-2 py-2.5 rounded-lg font-medium transition-all duration-200
+                ${
+                  pathname === "/company-profile/company-info"
+                    ? "bg-primary/10 text-primary shadow-sm"
+                    : "text-secondary"
+                }
+                hover:bg-primary/10 hover:text-primary
+                ${!sidebarOpen ? "justify-center px-0" : ""}`}
+            >
+              <span className="flex items-center justify-center">
+                <IconId className="w-5 h-5 text-primary" />
+              </span>
+              {sidebarOpen && <span className="truncate">Company Info</span>}
+            </Link>
           </Tooltip>
         </nav>
       </aside>
@@ -436,76 +371,23 @@ export default function MainLayout({ children }) {
                 </Tooltip>
               );
             })}
-            {/* Company Profile Collapsible (Mobile) */}
-            <Tooltip
-              label="Company Profile"
-              disabled={sidebarOpen}
-              withArrow
-              openDelay={300}
+            {/* Company Info Direct Link (Mobile) */}
+            <Link
+              href="/company-profile/company-info"
+              className={`group flex items-center gap-3 px-2 py-2.5 rounded-lg font-medium transition-all duration-200
+                ${
+                  pathname === "/company-profile/company-info"
+                    ? "bg-primary/10 text-primary shadow-sm"
+                    : "text-secondary"
+                }
+                hover:bg-primary/10 hover:text-primary`}
+              onClick={() => setMobileSidebarOpen(false)}
             >
-              <div>
-                <button
-                  type="button"
-                  onClick={() => setCompanyOpen((o) => !o)}
-                  className={`flex items-center w-full px-2 py-2.5 rounded-lg font-medium transition-colors duration-200 text-left
-                    ${
-                      companyOpen
-                        ? "bg-primary/10 text-primary"
-                        : "text-secondary"
-                    }
-                    hover:bg-primary/10 hover:text-primary
-                    ${
-                      !sidebarOpen ? "justify-center px-0" : "justify-between"
-                    }`}
-                  style={{ background: "none" }}
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <IconBuilding className="w-5 h-5 text-primary" />
-                    {sidebarOpen && (
-                      <span className="truncate">Company Profile</span>
-                    )}
-                  </div>
-                  {sidebarOpen && (
-                    <span className="flex-1 flex justify-end">
-                      {companyOpen ? (
-                        <IconChevronUp className="w-4 h-4" />
-                      ) : (
-                        <IconChevronDown className="w-4 h-4" />
-                      )}
-                    </span>
-                  )}
-                </button>
-                <Collapse
-                  in={companyOpen && sidebarOpen}
-                  transitionDuration={150}
-                >
-                  <div className="flex flex-col gap-1 pl-4 mt-1">
-                    {companyLinks.map((link) => {
-                      const isActive = pathname === link.href;
-                      const Icon = link.icon;
-                      return (
-                        <Link
-                          key={link.href}
-                          href={link.href}
-                          className={`flex items-center gap-2 px-2 py-2.5 rounded-md font-medium transition-all duration-200
-                            ${
-                              isActive
-                                ? "bg-primary/10 text-primary shadow-sm"
-                                : "text-secondary"
-                            }
-                            hover:bg-primary/10 hover:text-primary`}
-                        >
-                          <span className="flex items-center justify-center">
-                            <Icon className="w-5 h-5 text-primary" />
-                          </span>
-                          <span className="truncate">{link.label}</span>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                </Collapse>
-              </div>
-            </Tooltip>
+              <span className="flex items-center justify-center">
+                <IconId className="w-5 h-5 text-primary" />
+              </span>
+              <span className="truncate">Company Info</span>
+            </Link>
             {/* Tax Corner Collapsible (Mobile) */}
             <Tooltip
               label="Tax Corner"
@@ -654,6 +536,13 @@ export default function MainLayout({ children }) {
                   </div>
                 )}
                 <div className="border-t border-gray-100 mb-1" />
+                <MenuItem
+                  leftSection={<IconSettings className="w-5 h-5" />}
+                  onClick={() => router.push("/account")}
+                  className="text-[15px] font-medium hover:bg-blue-50/60 transition-colors"
+                >
+                  Account Settings
+                </MenuItem>
                 <MenuItem
                   leftSection={<IconCreditCard className="w-5 h-5" />}
                   onClick={() => router.push("/billing")}

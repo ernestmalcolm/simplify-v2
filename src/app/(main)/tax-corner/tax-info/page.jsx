@@ -2,7 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { IconCheck, IconAlertCircle } from "@tabler/icons-react";
+import {
+  IconCheck,
+  IconAlertCircle,
+  IconInfoCircle,
+  IconX,
+} from "@tabler/icons-react";
 import Link from "next/link";
 import { useRef } from "react";
 
@@ -345,7 +350,7 @@ const TAX_DETAILS = {
       {
         heading: "Useful Links",
         content:
-          "- [TRA Withholding Tax Guide](https://www.tra.go.tz/index.php/withholding-tax)",
+          "- [TRA WHT Guide](https://www.tra.go.tz/index.php/withholding-tax)\n- [TRA eFiling Portal](https://ots.tra.go.tz/)",
       },
     ],
   },
@@ -355,39 +360,42 @@ const TAX_DETAILS = {
       {
         heading: "Overview",
         content:
-          "Provisional tax is paid in advance based on estimated annual income.",
+          "Provisional tax is paid in quarterly installments to account for income tax liabilities throughout the year.",
       },
       {
         heading: "Who Must Comply",
         content:
-          "Taxpayers with income not subject to PAYE or withholding tax.",
+          "Individuals and entities receiving income not subject to final withholding tax, such as business income or rent.",
       },
       {
         heading: "Registration Requirements",
-        content: "- Register with TRA.\n- Obtain TIN.",
+        content:
+          "- Must have a TIN.\n- Automatically applicable if you have business or rental income.",
       },
-      { heading: "Tax Rates", content: "- Based on estimated annual income." },
+      {
+        heading: "Tax Rates",
+        content:
+          "Calculated based on estimated annual income and paid in four equal installments.",
+      },
       {
         heading: "Filing Deadlines",
         content:
-          "- Quarterly payments due in September, December, March, and June.",
+          "- Quarterly installments due by: 31st March, 30th June, 30th September, 31st December.",
       },
       {
         heading: "Penalties",
-        content: "- Late payment: Penalties and interest as per TRA.",
-      },
-      {
-        heading: "Exemptions",
-        content: "Some taxpayers may be exempt as per TRA.",
+        content:
+          "Underestimation of tax by more than 20% can lead to interest charges.",
       },
       {
         heading: "Required Forms",
-        content: "Provisional tax return forms (available on TRA portal).",
+        content:
+          "Provisional assessment forms available on the TRA eFiling portal.",
       },
       {
         heading: "Useful Links",
         content:
-          "- [TRA Provisional Tax Guide](https://www.tra.go.tz/index.php/provisional-tax)",
+          "- [TRA Provisional Tax Info](https://www.tra.go.tz/index.php/provisional-tax)\n- [TRA eFiling Portal](https://ots.tra.go.tz/)",
       },
     ],
   },
@@ -431,7 +439,7 @@ function renderSectionContent(content) {
     : content;
 }
 
-function TaxDetailModal({ open, onClose, taxKey }) {
+function TaxDetailModal({ open, onClose, taxKey, mainRef }) {
   if (!open || !taxKey) return null;
   const detail = TAX_DETAILS[taxKey];
   if (!detail) return null;
@@ -476,187 +484,88 @@ function TaxDetailModal({ open, onClose, taxKey }) {
 }
 
 function getSectionIcon(heading) {
-  const iconClass = "text-accent text-lg md:text-xl mr-1.5";
-  switch (heading) {
-    case "Overview":
-      return <span className={iconClass}>📄</span>;
-    case "Who Must Comply":
-      return <span className={iconClass}>👥</span>;
-    case "Registration Requirements":
-      return <span className={iconClass}>📝</span>;
-    case "Tax Rates":
-      return <span className={iconClass}>💰</span>;
-    case "Filing Deadlines":
-      return <span className={iconClass}>⏰</span>;
-    case "Penalties":
-      return <span className={iconClass}>⚠️</span>;
-    case "Exemptions":
-      return <span className={iconClass}>🚫</span>;
-    case "Required Forms":
-      return <span className={iconClass}>📑</span>;
-    case "Useful Links":
-      return <span className={iconClass}>🔗</span>;
+  switch (heading.toLowerCase()) {
+    case "overview":
+      return <IconInfoCircle className="w-6 h-6 text-blue-500" />;
+    case "who must comply":
+      return <IconCheck className="w-6 h-6 text-green-500" />;
+    case "registration requirements":
+      return <IconCheck className="w-6 h-6 text-green-500" />;
+    case "tax rates":
+      return "💰";
+    case "filing deadlines":
+      return "📅";
+    case "penalties":
+      return <IconAlertCircle className="w-6 h-6 text-red-500" />;
+    case "exemptions":
+      return <IconCheck className="w-6 h-6 text-green-500" />;
+    case "required forms":
+      return "📄";
+    case "useful links":
+      return "🔗";
     default:
-      return null;
+      return "🔹";
   }
 }
 
 export default function TaxInfoPage() {
-  const [company, setCompany] = useState(null);
-  const [metrics, setMetrics] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedTaxKey, setSelectedTaxKey] = useState(null);
+  const [selectedTax, setSelectedTax] = useState(null);
+  const mainRef = useRef(null);
 
-  useEffect(() => {
-    async function fetchData() {
-      setLoading(true);
-      setError(null);
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
-      if (!user || userError) {
-        setError("Not logged in");
-        setLoading(false);
-        return;
-      }
-      // Fetch company profile
-      const { data: companyData, error: companyError } = await supabase
-        .from("companies")
-        .select("id, name, tin, vat_registered, plan")
-        .eq("user_id", user.id)
-        .single();
-      if (!companyData || companyError) {
-        setError("Company profile not found");
-        setLoading(false);
-        return;
-      }
-      setCompany(companyData);
-      // Fetch latest metrics
-      const { data: metricsData, error: metricsError } = await supabase
-        .from("company_financial_metrics")
-        .select("*")
-        .eq("company_id", companyData.id)
-        .order("year", { ascending: false })
-        .limit(1);
-      if (metricsError) {
-        setError("Could not load company metrics");
-        setLoading(false);
-        return;
-      }
-      setMetrics(metricsData && metricsData[0] ? metricsData[0] : {});
-      setLoading(false);
-    }
-    fetchData();
-  }, []);
+  function handleOpenModal(taxKey) {
+    setSelectedTax(taxKey);
+    setModalOpen(true);
+  }
 
-  const data = { ...company, ...metrics };
-
-  // Collect missing required fields for any applicable tax type
-  const missingFields = TAX_TYPES.flatMap((tax) =>
-    getMissingFields(data, tax.requiredFields || [])
-  );
-  const uniqueMissingFields = [...new Set(missingFields)];
+  function handleCloseModal() {
+    setModalOpen(false);
+    setSelectedTax(null);
+  }
 
   return (
-    <div className="max-w-4xl mx-auto py-10 px-4">
-      <h1 className="text-2xl sm:text-3xl font-bold text-primary mb-4 flex items-center gap-2">
-        <span>📚</span> Tax Info
-      </h1>
-      <p className="text-secondary text-lg mb-4">
-        Personalized tax information for your company.
-      </p>
-      {loading && (
-        <div className="flex items-center gap-2 text-blue-500">
-          <span className="animate-spin">🔄</span> Loading your company data...
-        </div>
-      )}
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 mb-4 flex items-center gap-2">
-          <IconAlertCircle size={20} /> {error}
-        </div>
-      )}
-      {!loading && !error && uniqueMissingFields.length > 0 && (
-        <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-lg px-4 py-3 mb-4 flex items-center gap-2">
-          <IconAlertCircle size={20} />
-          Some required company info is missing:{" "}
-          {uniqueMissingFields.join(", ")}. Please update your company profile
-          and metrics for full tax guidance.
-        </div>
-      )}
+    <div className="max-w-7xl mx-auto p-4 sm:p-6 md:p-8" ref={mainRef}>
+      <div className="text-center mb-10">
+        <h1 className="text-3xl sm:text-4xl font-bold text-primary">
+          Tanzania Tax Information Hub
+        </h1>
+        <p className="mt-4 text-lg text-secondary max-w-3xl mx-auto">
+          Explore key tax categories to understand your obligations, deadlines,
+          and compliance requirements. Click on any tax type to learn more.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {TAX_TYPES.map((tax) => (
+          <div
+            key={tax.key}
+            className="bg-white/80 border border-gray-200/80 rounded-xl shadow-lg p-6 flex flex-col hover:shadow-xl transition-shadow duration-300"
+          >
+            <div className="flex items-center gap-4 mb-3">
+              <span className="text-3xl">{tax.icon}</span>
+              <h2 className="text-xl font-bold text-primary">{tax.title}</h2>
+            </div>
+            <p className="text-secondary mb-4 flex-grow">{tax.summary}</p>
+            <p className="text-sm text-gray-500 mb-4">
+              <span className="font-semibold">Typical Deadline:</span>{" "}
+              {tax.deadline}
+            </p>
+            <button
+              onClick={() => handleOpenModal(tax.key)}
+              className="mt-auto w-full bg-primary/10 text-primary font-semibold py-2 px-4 rounded-lg hover:bg-primary/20 transition-colors"
+            >
+              Learn More
+            </button>
+          </div>
+        ))}
+      </div>
+
       <TaxDetailModal
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        taxKey={selectedTaxKey}
+        onClose={handleCloseModal}
+        taxKey={selectedTax}
+        mainRef={mainRef}
       />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-        {TAX_TYPES.map((tax) => {
-          const applicable =
-            tax.always || (tax.isApplicable ? tax.isApplicable(data) : false);
-          const missing = getMissingFields(data, tax.requiredFields || []);
-          return (
-            <div
-              key={tax.key}
-              className={`relative bg-white/90 border rounded-2xl shadow-soft px-6 py-5 flex flex-col min-h-[180px] transition-all duration-200 ${
-                applicable && missing.length === 0
-                  ? "border-blue-200"
-                  : "border-gray-200 opacity-60"
-              }`}
-            >
-              <div className="flex items-center gap-3 mb-2">
-                <span className="text-2xl">{tax.icon}</span>
-                <h2 className="text-lg font-bold text-primary flex-1">
-                  {tax.title}
-                </h2>
-                {!applicable && (
-                  <span className="bg-gray-100 text-gray-500 text-xs px-2 py-1 rounded font-semibold ml-2">
-                    Not applicable
-                  </span>
-                )}
-              </div>
-              <div className="text-secondary text-sm mb-2">{tax.summary}</div>
-              {applicable && missing.length === 0 && (
-                <div className="text-blue-900 text-sm mb-2">
-                  <IconCheck
-                    size={16}
-                    className="inline-block mr-1 text-green-500 align-text-bottom"
-                  />
-                  {tax.compliance(data)}
-                </div>
-              )}
-              {applicable && missing.length > 0 && (
-                <div className="text-yellow-800 text-xs mb-2 flex items-center gap-1">
-                  <IconAlertCircle size={14} className="text-yellow-600" />
-                  Missing: {missing.join(", ")}
-                </div>
-              )}
-              <ul className="text-xs text-gray-700 mb-2 list-disc list-inside">
-                {tax.requirements.map((req, i) => (
-                  <li key={i}>{req}</li>
-                ))}
-              </ul>
-              <div className="flex items-center justify-between mt-auto">
-                <span className="text-xs text-gray-500">
-                  Deadline: {tax.deadline}
-                </span>
-                {tax.cta && (
-                  <button
-                    className="text-info text-xs font-semibold hover:underline ml-2"
-                    onClick={() => {
-                      setSelectedTaxKey(tax.key);
-                      setModalOpen(true);
-                    }}
-                  >
-                    {tax.cta.label} →
-                  </button>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
     </div>
   );
 }

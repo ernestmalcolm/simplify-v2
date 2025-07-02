@@ -5,13 +5,14 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Burger, Drawer } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
+import { motion } from "framer-motion";
 
 const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/tax-tips", label: "Tax Tips" },
-  { href: "/tax-info", label: "Tax Info" },
-  { href: "/tax-ai", label: "Tax AI" },
-  { href: "/calendar", label: "Tax Calendar" },
+  { href: "/#features", label: "Features" },
+  { href: "/#how-it-works", label: "How it Works" },
+  { href: "/#pricing", label: "Pricing" },
+  { href: "/#testimonials", label: "Testimonials" },
+  { href: "/#contact", label: "Contact" },
 ];
 
 export default function Navbar() {
@@ -44,45 +45,51 @@ export default function Navbar() {
           {/* Desktop Nav */}
           <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
             {navLinks.map((link) => {
-              const isTaxInfo = link.href === "/tax-info";
-              const isActive = isTaxInfo
-                ? pathname.startsWith("/tax-info")
-                : pathname === link.href;
+              const isActive = pathname === link.href;
               return (
-                <Link
+                <motion.div
                   key={link.href}
-                  href={link.href}
-                  className={`relative inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors duration-200 group/navlink
-                    ${
-                      isActive
-                        ? "text-primary"
-                        : "text-secondary hover:text-primary"
-                    }
-                  `}
+                  whileHover={{ y: -3 }}
+                  transition={{ type: "spring", stiffness: 300 }}
                 >
-                  <span className="transition-transform duration-200 group-hover/navlink:-translate-y-1">
-                    {link.label}
-                  </span>
-                  <span
-                    className={`absolute left-0 -bottom-0.5 h-0.5 w-full rounded bg-gradient-to-r from-primary to-accent transition-all duration-300
+                  <Link
+                    href={link.href}
+                    className={`relative inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors duration-200 group
                       ${
                         isActive
-                          ? "opacity-100 scale-x-100"
-                          : "opacity-0 scale-x-0 group-hover:scale-x-100 group-hover:opacity-60"
+                          ? "text-primary"
+                          : "text-secondary hover:text-primary"
                       }
                     `}
-                    style={{ transformOrigin: "left" }}
-                  />
-                </Link>
+                  >
+                    {link.label}
+                    <span
+                      className={`absolute left-0 -bottom-1 h-0.5 w-full rounded bg-gradient-to-r from-primary to-accent transition-all duration-300
+                        ${
+                          isActive
+                            ? "opacity-100 scale-x-100"
+                            : "opacity-0 scale-x-0 group-hover:scale-x-100 group-hover:opacity-60"
+                        }
+                      `}
+                      style={{ transformOrigin: "center" }}
+                    />
+                  </Link>
+                </motion.div>
               );
             })}
           </div>
 
           {/* Desktop Sign In */}
-          <div className="hidden sm:flex items-center">
+          <div className="hidden sm:flex items-center space-x-4">
+            <Link
+              href="/register"
+              className="text-sm font-semibold text-primary px-5 py-2 rounded-md border-2 border-primary transition-transform duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/40"
+            >
+              Register
+            </Link>
             <Link
               href="/login"
-              className="ml-4 text-sm font-semibold text-white px-5 py-2 rounded-md bg-gradient-to-r from-primary to-accent shadow transition-transform duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/40"
+              className="text-sm font-semibold text-white px-5 py-2 rounded-md bg-gradient-to-r from-primary to-accent shadow transition-transform duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/40"
             >
               Sign In
             </Link>
@@ -114,27 +121,36 @@ export default function Navbar() {
       >
         <div className="flex flex-col gap-2 px-6 py-8">
           {navLinks.map((link) => {
-            const isTaxInfo = link.href === "/tax-info";
-            const isActive = isTaxInfo
-              ? pathname.startsWith("/tax-info")
-              : pathname === link.href;
+            const isActive = pathname === link.href;
             return (
-              <Link
+              <motion.div
                 key={link.href}
-                href={link.href}
-                onClick={closeDrawer}
-                className={`block py-3 text-lg font-medium rounded transition-colors duration-200
-                  ${
-                    isActive
-                      ? "text-primary"
-                      : "text-secondary hover:text-primary"
-                  }
-                `}
+                whileHover={{ x: 5 }}
+                transition={{ type: "spring", stiffness: 300 }}
               >
-                {link.label}
-              </Link>
+                <Link
+                  href={link.href}
+                  onClick={closeDrawer}
+                  className={`block py-3 text-lg font-medium rounded transition-colors duration-200
+                    ${
+                      isActive
+                        ? "text-primary bg-primary/10"
+                        : "text-secondary hover:text-primary"
+                    }
+                  `}
+                >
+                  {link.label}
+                </Link>
+              </motion.div>
             );
           })}
+          <Link
+            href="/register"
+            onClick={closeDrawer}
+            className="mt-4 text-center text-base font-semibold text-primary px-5 py-3 rounded-md border-2 border-primary transition-transform duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/40"
+          >
+            Register
+          </Link>
           <Link
             href="/login"
             onClick={closeDrawer}
